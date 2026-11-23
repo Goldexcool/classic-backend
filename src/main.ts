@@ -4,7 +4,7 @@ import { NestFactory } from '@nestjs/core';
 import { AppModule } from './app.module';
 
 async function bootstrap() {
-  const app = await NestFactory.create(AppModule);
+  const app = await NestFactory.create(AppModule, { rawBody: true });
   app.setGlobalPrefix('api');
   const origins = (process.env.CORS_ORIGINS ?? 'http://localhost:3001').split(',').map((origin) => origin.trim()).filter(Boolean);
   app.enableCors({ origin: origins, credentials: true });

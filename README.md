@@ -1,6 +1,6 @@
 # Gatepass backend
 
-NestJS modular monolith for a multi-tenant ticketing platform. The first backend slice covers accounts, tenant onboarding, event and ticket-type creation, and publishing a public event page. Checkout and payment-provider integration are not included yet.
+NestJS modular monolith for a multi-tenant ticketing platform. It covers accounts, tenant onboarding, event and ticket-type creation, public event pages, Bachs-hosted ticket checkout, verified payment webhooks, and organizer payment records.
 
 ## Run locally
 
@@ -20,6 +20,9 @@ The API listens on port 3000. Health check: `GET /api/health`.
 | `JWT_SECRET` | Private signing secret for access tokens. |
 | `CORS_ORIGINS` | Comma-separated browser origins allowed to call the API; defaults to `http://localhost:3001`. |
 | `PORT` | HTTP port; defaults to `3000`. |
+| `BACHS_SECRET_KEY` | Server-only Bachs API key. Use a sandbox key for sandbox testing; never expose it to the browser. |
+| `BACHS_WEBHOOK_SECRET` | Signing secret for the Bachs webhook endpoint. |
+| `GATEPASS_FRONTEND_URL` | Public frontend origin used for checkout return and cancel links. |
 
 ## Initial API
 
@@ -30,9 +33,12 @@ The API listens on port 3000. Health check: `GET /api/health`.
 - `POST /api/tenants/:tenantSlug/events/:eventId/publish`
 - `GET /api/public/:tenantSlug/events`
 - `GET /api/public/:tenantSlug/events/:eventSlug`
+- `POST /api/public/:tenantSlug/events/:eventSlug/checkout`
+- `GET /api/public/payments/:paymentId`
+- `POST /api/webhooks/bachs`
 
-Event pages support HTTPS cover/gallery image URLs, a schedule, guest information, and a contact email. Buyer and payment records appear only after a provider confirms orders.
+Event pages support HTTPS cover/gallery image URLs, a schedule, guest information, and a contact email. Bachs checkout prices are loaded from PostgreSQL, use a persisted idempotency key, and are fulfilled only after a signature-verified webhook and provider checkout lookup confirm the amount, currency, and reference. Webhook event IDs are deduplicated in PostgreSQL.
 
-Protected routes use a bearer access token. Ticket prices are integer minor units plus an ISO-style three-letter currency code. Ticket checkout and payment verification must be added with the chosen payment provider before accepting money.
+Protected routes use a bearer access token. Ticket prices are integer minor units plus an ISO-style three-letter currency code. Gatepass records a 3% fee in the payment ledger. This checkout does not create organizer Connect accounts or automatically split/payout funds; configure Bachs marketplace settlement before representing the fee as an automatic organizer deduction.
 
 BullMQ is configured with a `ticketing` queue. Queue consumers should be added with the first confirmed asynchronous workflow (such as payment-confirmed ticket delivery).

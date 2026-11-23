@@ -6,6 +6,7 @@ import { AdminModule } from './admin/admin.module';
 import { DatabaseModule } from './database/database.module';
 import { EventsModule } from './events/events.module';
 import { HealthModule } from './health/health.module';
+import { PaymentsModule } from './payments/payments.module';
 import { QueueModule } from './queue/queue.module';
 import { redisConnection } from './queue/redis-connection';
 import { TenantsModule } from './tenants/tenants.module';
@@ -25,6 +26,7 @@ import { TenantsModule } from './tenants/tenants.module';
     AdminModule,
     TenantsModule,
     EventsModule,
+    PaymentsModule,
     HealthModule,
   ],
 })
