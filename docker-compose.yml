@@ -1,0 +1,49 @@
+services:
+  api:
+    build: .
+    env_file: .env
+    environment:
+      PORT: 3000
+      DATABASE_URL: postgresql://asaop:asaop-local@database:5432/asaop
+      REDIS_URL: redis://redis:6379
+      ADMIN_EMAILS: ${ADMIN_EMAILS:-}
+    ports:
+      - "3000:3000"
+    depends_on:
+      database:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
+
+  database:
+    image: postgres:16-alpine
+    environment:
+      POSTGRES_USER: asaop
+      POSTGRES_PASSWORD: asaop-local
+      POSTGRES_DB: asaop
+    ports:
+      - "5433:5432"
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U asaop -d asaop"]
+      interval: 5s
+      timeout: 3s
+      retries: 10
+
+  redis:
+    image: redis:7-alpine
+    command: ["redis-server", "--appendonly", "yes", "--maxmemory-policy", "noeviction"]
+    ports:
+      - "6380:6379"
+    volumes:
+      - redis_data:/data
+    healthcheck:
+      test: ["CMD", "redis-cli", "ping"]
+      interval: 5s
+      timeout: 3s
+      retries: 10
+
+volumes:
+  redis_data:
+  postgres_data:
