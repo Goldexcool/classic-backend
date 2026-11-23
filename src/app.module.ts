@@ -10,6 +10,7 @@ import { PaymentsModule } from './payments/payments.module';
 import { QueueModule } from './queue/queue.module';
 import { redisConnection } from './queue/redis-connection';
 import { TenantsModule } from './tenants/tenants.module';
+import { UploadsModule } from './uploads/uploads.module';
 
 @Module({
   imports: [
@@ -27,6 +28,7 @@ import { TenantsModule } from './tenants/tenants.module';
     TenantsModule,
     EventsModule,
     PaymentsModule,
+    UploadsModule,
     HealthModule,
   ],
 })
